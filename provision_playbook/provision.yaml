@@ -1,0 +1,15 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - ansible-core
+      - ansible-runner
+      - python3-click
+    state: present
+
+- name: Install Initiator
+  ansible.builtin.copy:
+    name: git
+    state: present
+
+# vim: ft=yaml.ansible

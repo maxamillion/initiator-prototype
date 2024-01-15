@@ -1,0 +1,10 @@
+---
+- name: Test initiator payload
+  hosts: localhost
+  gather_facts: False
+  tasks:
+  - name: Print a message via a playbook
+    ansible.builtin.debug:
+      msg: "Initiator ran the payload!"
+
+# vim: ft=yaml.ansible
