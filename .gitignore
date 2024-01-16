@@ -162,3 +162,5 @@ cython_debug/
 # example payload artifacts directory
 example_payload/artifacts/
 example_payload/daemon.log
+
+example_payload.tar
