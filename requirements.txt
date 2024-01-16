@@ -1,3 +1,5 @@
 click
 ansible-core
 ansible-runner
+ansible-sdk
+paho-mqtt
