@@ -20,7 +20,7 @@ else
     exit 1
 fi
 
-$CONTAINER_ENGINE run --rm -t \
+$CONTAINER_ENGINE run --rm -t --name="initiator_${TIMESTAMP}" -v /tmp:/tmp \
     hivemq/mqtt-cli subscribe \
     -h $BROKER_HOSTNAME -p $BROKER_PORT -t $BROKER_CLIENT_TOPIC --rcvMax 1 > /tmp/initiator_input_${TIMESTAMP}.bin &
 
@@ -49,5 +49,7 @@ echo "Creating tarball of output dir ..."
 $CONTAINER_ENGINE run --rm -t -v /tmp:/tmp \
     hivemq/mqtt-cli publish -h $BROKER_HOSTNAME -p $BROKER_PORT -t $BROKER_INGRESS_TOPIC \
     --message-file /tmp/initiator_output_${TIMESTAMP}.tar.gz
+
+$CONTAINER_ENGINE stop initiator_${TIMESTAMP} 
 
 echo "Initiator ran the payload and published the results!"
