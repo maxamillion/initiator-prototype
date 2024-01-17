@@ -3,12 +3,9 @@
 #
 #
 
-BROKER_HOSTNAME="mqtt.eclipseprojects.io"
-BROKER_PORT="1883"
-BROKER_CLIENT_TOPIC="ansible/initiator/hostid/123456789"
-BROKER_INGRESS_TOPIC="ansible/initiator/ingress/hostid/123456789"
+. envs.sh
+
 TIMESTAMP=$(date +"%y%m%d%H%M%S")
-TIMEOUT=120
 
 # detect podman or docker
 if [ -x "$(command -v docker)" ]; then
@@ -22,7 +19,7 @@ fi
 
 $CONTAINER_ENGINE run --rm -t --name="initiator_${TIMESTAMP}" -v /tmp:/tmp \
     hivemq/mqtt-cli subscribe \
-    -h $BROKER_HOSTNAME -p $BROKER_PORT -t $BROKER_CLIENT_TOPIC --rcvMax 1 > /tmp/initiator_input_${TIMESTAMP}.bin &
+    -h $BROKER_HOSTNAME -p $BROKER_PORT -t $BROKER_CLIENT_TOPIC --rcvMax 1 -of /tmp/initiator_input_${TIMESTAMP}.bin &
 
 echo "Waiting for input payload to be published to broker..."
 while true
