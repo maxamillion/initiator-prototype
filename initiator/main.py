@@ -1,48 +1,53 @@
-import tarfile
+import os
+import subprocess
 import paho.mqtt.client as mqtt
 
-broker_address = "mqtt.eclipseprojects.io"
-broker_port = 1883  # Default MQTT port
+BROKER_ADDRESS = "mqtt.eclipseprojects.io"
+BROKER_PORT = 1883  # Default MQTT port
 
-# Tarball path and topic
-tarball_path = "./example_payload.tar"
-topic = "ansible/initiator/hostid/123456789"
+# Tarball path and TOPIC
+TOPIC = "ansible/initiator/hostid/123456789"
 
-save_dir = "/tmp/initiator_payloads/"
-os.makedirs(save_dir, exist_ok=True)  # Ensure folder exists
+SAVE_DIR = f"/tmp/initiator_payloads/{os.getpid()}"
+os.makedirs(SAVE_DIR, exist_ok=True)  # Ensure folder exists
 
 def on_connect(client, userdata, flags, rc):
+    print("DEBUG::on_connect: function entry")
     if rc == 0:
-            print("Connected to MQTT broker")
-            client.subscribe(topic)
-        else:
-            print("Failed to connect, return code %d\n", rc)
+        print("Connected to MQTT broker...")
+        client.subscribe(TOPIC)
+    else:
+        print("Failed to connect, return code %d...", rc)
+    print("DEBUG::on_connect: function exit")
 
 def on_message(client, userdata, msg):
-    print("Received tarball data on topic:", msg.topic)
-    filename = f"{save_dir}/received_tarball_{os.getpid()}.tar.gz"
+    print("DEBUG::on_message: function entry")
+    print("Received tarball data on TOPIC:", msg.topic)
+    filename = f"{SAVE_DIR}/received_payload_{os.getpid()}"
 
-    with open(filename, "wb") as tarball_file:
-        tarball_file.write(msg.payload)
+    with open(filename, "wb") as payload_file:
+        payload_file.write(msg.payload)
 
-    print(f"Tarball saved to: {filename}")
+    output = subprocess.Popen(
+        f"cat {filename}|ansible-runner worker|ansible-runner process ./{SAVE_DIR}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stdin=subprocess.PIPE
+    )
 
-    # Extract the tarball (optional)
-    with tarfile.open(filename, "r:gz") as tar:
-        tar.extractall(path=save_dir)
-        print("Tarball extracted successfully")
 
-def get_work() -> None:
-    """
-    Prototype for getting an ansible-runner work item from a MQTT broker.
-    """
+    client.disconnect()
+    print("DEBUG::on_message: function exit")
 
+
+if __name__ == '__main__':
+    print("Starting initiator...")
+    print("DEBUG::main: creating MQTT client")
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.connect(broker_address, broker_port)
-
-if __name__ == '__main__':
-    get_work()
+    print("Connecting to MQTT broker...")
+    client.connect(BROKER_ADDRESS, BROKER_PORT)
+    client.loop_forever()
 
