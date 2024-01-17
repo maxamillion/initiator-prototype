@@ -3,7 +3,8 @@
 #
 #
 
-. envs.sh
+# Get shared vars from vars.sh
+source vars.sh
 
 TIMESTAMP=$(date +"%y%m%d%H%M%S")
 

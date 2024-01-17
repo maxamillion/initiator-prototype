@@ -3,7 +3,8 @@
 #
 #
 
-. envs.sh
+# Get shared vars from vars.sh
+source vars.sh 
 
 # detect podman or docker
 if [ -x "$(command -v docker)" ]; then
@@ -18,5 +19,7 @@ fi
 ansible-runner transmit ./example_payload -p test.yml > /tmp/example_payload.bin
 
 $CONTAINER_ENGINE run --rm -t -v /tmp:/tmp \
-    hivemq/mqtt-cli publish -h $BROKER_HOSTNAME -p $BROKER_PORT -t $BROKER_TOPIC \
-    -r --message-file /tmp/example_payload.bin
+    hivemq/mqtt-cli publish -h $BROKER_HOSTNAME -p $BROKER_PORT -t $BROKER_CLIENT_TOPIC \
+    --message-file /tmp/example_payload.bin
+
+echo "Fake Controller published a Job payload!"
